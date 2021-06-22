@@ -1,7 +1,7 @@
 package com.example.simpletodo;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import java.util.List;
@@ -9,9 +9,16 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
+    public interface OnLongClickListener{
+        void onItemLongClicked(int position);
+    }
+
     List<String> items;
-    public ItemsAdapter(List<String> items){
+    OnLongClickListener longClickListener;
+    public ItemsAdapter(List<String> items, OnLongClickListener longClickListener){
+
         this.items = items;
+        this.longClickListener = longClickListener;
     }
 
     @NonNull
@@ -46,6 +53,16 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
         //update the view inside the viewHolder with this data.
         public void bind(String item) {
             tvitem.setText(item);
+            tvitem.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    //Notify the listener which positon to remove
+                    longClickListener.onItemLongClicked(getAdapterPosition());
+                    return true;
+                }
+            });
+
+
         }
     }
 }

@@ -1,26 +1,32 @@
 package com.example.simpletodo;
 
-import android.support.v7.app.AppCompatActivity;
+//import android.os.FileUtils;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.util.Log;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.List;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.widget.Toast;
+
+import org.apache.commons.io.FileUtils;
 
 public class MainActivity extends AppCompatActivity {
 
-    List<String> items;
+    ArrayList items; //= new ArrayList<String>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));//= new ArrayList<>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
 
     Button button;
     EditText edit;
     RecyclerView rv;
+    ItemsAdapter itemsAdapter;
 
 
 
@@ -29,14 +35,34 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         items = new ArrayList<>();
-        items.add("rsvp for that thing");
+        loadItems();
 
 
         button = findViewById(R.id.updateButton);
         edit = findViewById(R.id.newTask);
         rv = findViewById(R.id.listy);
 
-        ItemsAdapter itemsAdapter = new ItemsAdapter(items);
+        ItemsAdapter.OnLongClickListener onClickListener = new ItemsAdapter.OnLongClickListener(){
+            @Override
+            public void onItemLongClicked(int position){
+
+                Toast.makeText(getApplicationContext(), "Removed " + items.get(position), Toast.LENGTH_SHORT).show();
+
+
+                //Delete the item
+                items.remove(position);
+
+                //notify the adapter
+                itemsAdapter.notifyItemRemoved(position);
+                saveItems();
+
+
+
+
+            }
+        };
+
+        itemsAdapter = new ItemsAdapter(items, onClickListener);
         rv.setAdapter(itemsAdapter);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -51,9 +77,37 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(getApplicationContext(), "Added " + edit.getText().toString(), Toast.LENGTH_SHORT).show();
                 edit.setText("");
+                saveItems();
             }
         });
 
+
+
+    }
+
+    private File getDataFile(){
+        return new File(getFilesDir(), "data.txt");
+
+    }
+    //This function will load items by reading every line of the data file
+    private void loadItems(){
+        try {
+            items = new ArrayList<>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
+        } catch (IOException e) {
+            Log.e("MainActivity", "Error reading items", e);
+            items = new ArrayList();
+        }
+        //.readLines(getDataFile(), Charset.defaultCharset()));
+
+    }
+
+    //saving our changes
+    private void saveItems(){
+        try {
+            FileUtils.writeLines(getDataFile(), items);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 }
