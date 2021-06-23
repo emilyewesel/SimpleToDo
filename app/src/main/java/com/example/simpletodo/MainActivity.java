@@ -21,14 +21,11 @@ import org.apache.commons.io.FileUtils;
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList items; //= new ArrayList<String>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));//= new ArrayList<>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
-
+    ArrayList items;
     Button button;
     EditText edit;
     RecyclerView rv;
     ItemsAdapter itemsAdapter;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +67,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String newItem = edit.getText().toString();
+                //add the item
                 items.add(newItem);
 
+                //notify the adapter
                 itemsAdapter.notifyItemInserted(items.size()-1);
-
 
                 Toast.makeText(getApplicationContext(), "Added " + edit.getText().toString(), Toast.LENGTH_SHORT).show();
                 edit.setText("");
